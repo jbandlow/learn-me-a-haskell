@@ -1,4 +1,4 @@
-import Data.List  
+import Data.List
 
 -- ghci gives the interactive prompt, from the command line.
 -- A file (like this) can be loaded with :l <filename>
@@ -8,7 +8,7 @@ import Data.List
 -- Modules are here:
 --      https://downloads.haskell.org/~ghc/latest/docs/html/libraries/
 -- Hoogle is how to search for Haskell things:
---      https://www.haskell.org/hoogle/ 
+--      https://www.haskell.org/hoogle/
 
 -- ARITHMETIC
 -- arithmetic works, with caveats
@@ -18,26 +18,26 @@ import Data.List
 -- == tests equality and /= is inequality
 
 -- FUNCTIONS
--- Function application is with a space, not parens. 
+-- Function application is with a space, not parens.
 -- Function application has the highest precedence in Haskell.
 -- Functions with two args can be written infix with backticks:
 --      10 `div` 2 == 5
--- A function definition: 
+-- A function definition:
 doubleMe x = x + x
 --   doubleMe 5 == 10
 
 -- More function examples
-doubleUs x y = doubleMe x + doubleMe y 
+doubleUs x y = doubleMe x + doubleMe y
 doubleSmallNumber x = if x > 100
         then x
         else x * 2
 -- ' is valid in function names, and often denotes a small change
-doubleSmallNumber' x = (if x > 100 then x else x*2) + 1  
+doubleSmallNumber' x = (if x > 100 then x else x*2) + 1
 
 -- Functions CANNOT begin with an uppercase letter.
-conanO'Brien = "It's a-me, Conan O'Brien!" 
+conanO'Brien = "It's a-me, Conan O'Brien!"
 -- Inside ghci, use "let" for assignments:
---    ghci> let conanO'Brien = "It's a-me, Conan O'Brien!" 
+--    ghci> let conanO'Brien = "It's a-me, Conan O'Brien!"
 
 -- LISTS
 -- All elements of a list must have the same type
@@ -54,10 +54,10 @@ helloString = "Hello"
 --   0:lostNumbers == [0,4,8,15,16,23,42]
 --   : is constant-time.
 -- !! is the (0-based) index operator
--  helloString !! 1 == 'e'
+--  helloString !! 1 == 'e'
 --   Indexing outside of the list is an error.
 -- <, >, <=, >= compare lists in lex order.
--Common list functions:
+--Common list functions:
 --   head,tail,init,last,length,null,reverse,take,drop,maximum,minimum
 --   elem,sum,product,cycle,repeat,replicate
 --
@@ -65,7 +65,7 @@ helloString = "Hello"
 --   [1..5] == [1,2,3,4,5]
 --   [2,4..11] == [2,4,6,8,10]
 --   [10,9..6] == [10,9,8,7,6]  ([10..6] does NOT work)
--- 
+--
 -- Infinite lists work, and are lazy.
 --   naturalNumbers = [0..]
 --   take 4 naturalNumbers = [0,1,2,3]
@@ -123,7 +123,7 @@ addThree x y z = x + y + z
 --   Bounded: Types with a minimum (minBound) and maximum (maxBound).
 --   Num: Types which support arithmetic.
 --   Integral: Contains Int and Integer. fromIntegral will return an element
---     of a Num class from an Integral input. 
+--     of a Num class from an Integral input.
 --   Floating: Contains Float and Double
 
 
@@ -139,32 +139,32 @@ isSeven x = "No, " ++ show x ++ " is not seven."
 -- guards we use '=' for each guard, not after the parameter pattern.
 factorial :: (Integral a) => a -> a
 factorial n
-    | n < 0     = 0  -- No it's not, but whatever. 
+    | n < 0     = 0  -- No it's not, but whatever.
     | n == 0    = 1
     | otherwise = n * factorial (n - 1)
 
 -- We can pattern match against tuples:
-addVectors :: (Num a) => (a, a) -> (a, a) -> (a, a)  
+addVectors :: (Num a) => (a, a) -> (a, a) -> (a, a)
 addVectors (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
 
 -- Matching the first item in a list is a common pattern, typically with
 -- recursion.
-sum' :: (Num a) => [a] -> a  
-sum' [] = 0  
-sum' (x:xs) = x + sum' xs  
+sum' :: (Num a) => [a] -> a
+sum' [] = 0
+sum' (x:xs) = x + sum' xs
 
 -- We can also give a name to the whole pattern, by using a name followed by
--- the symbol @. This is called an "as pattern". 
-capital :: String -> String  
-capital "" = "Empty string, whoops!"  
-capital all@(x:xs) = "The first letter of " ++ all ++ " is " ++ [x] 
+-- the symbol @. This is called an "as pattern".
+capital :: String -> String
+capital "" = "Empty string, whoops!"
+capital all@(x:xs) = "The first letter of " ++ all ++ " is " ++ [x]
 
 -- A 'where' clause can be used to define values that are used multiple times,
 -- or for syntactic clarity. The scope is the current function definition
 -- i.e., everything after <function name> <parameter pattern>, including all
 -- guards.
 circleSize :: (RealFloat a) => a -> String
-circleSize r 
+circleSize r
     | area > big    = "That's a big circle."
     | area > little = "That's a normal circle."
     | otherwise     = "That's a wee circle."
@@ -173,7 +173,7 @@ circleSize r
 
 -- More tightly scoped temporaries can be defined with "let" .. "in". These
 -- only exist in the context of the current statement, and can no be used to
--- span guards. 
+-- span guards.
 cylinderArea :: (RealFloat a) => a -> a -> a
 cylinderArea r h =
     let sideArea = 2 * pi * r * h
@@ -185,14 +185,14 @@ cylinderArea r h =
 --     4 * (let a = 9 in a + 1) + 2  == 42
 
 -- in can be omitted, if there is already a context for the let.
-calcBmis :: (RealFloat a) => [(a, a)] -> [a]  
-calcBmis xs = [bmi | (w, h) <- xs, let bmi = w / h ^ 2]  
+calcBmis :: (RealFloat a) => [(a, a)] -> [a]
+calcBmis xs = [bmi | (w, h) <- xs, let bmi = w / h ^ 2]
 
 -- CASE statements.  They look like "case <item> of (<pattern> -> <result>)"
-describeList :: [a] -> String  
-describeList xs = "The list is " ++ case xs of [] -> "empty."  
-                                               [x] -> "a singleton list."   
-                                               xs -> "a longer list." 
+describeList :: [a] -> String
+describeList xs = "The list is " ++ case xs of [] -> "empty."
+                                               [x] -> "a singleton list."
+                                               xs -> "a longer list."
 
 
 -- RECURSION
@@ -222,7 +222,7 @@ quicksort (x:xs) =
 -- This is fast and easy to write, and fun to play with.
 collatzSequence :: (Integral a) => a -> [a]
 collatzSequence n
-    | n <= 0    = [] 
+    | n <= 0    = []
     | n == 1    = n : []
     | even n    = n : collatzSequence (n `div` 2)
     | odd n     = n : collatzSequence (3 * n + 1)
@@ -247,7 +247,7 @@ numUniques = length . nub
 --      sum (takeWhile (<1000) (filter odd (map (^2) [1..])))
 
 -- $ is syntactic sugar for function application.  It's low precedence, so it
--- allows you to omit parentheses. Instead of 
+-- allows you to omit parentheses. Instead of
 --      sum (takeWhile (<1000) (filter odd (map (^2) [1..])))
 --  we can write
 --      sum $ takeWhile (<1000) $ filter odd $ map (^2) [1..]
@@ -261,11 +261,11 @@ numUniques = length . nub
 -- Summary of function notation:
 --      negate sqrt 5       -- Error.
 --      negate (sqrt 5)     -- This works.
---      negate $ sqrt 5     -- This works. 
+--      negate $ sqrt 5     -- This works.
 --      (negate . sqrt) 5   -- This works.
 --      negate . sqrt $ 5   -- This works.
 --      (negate sqrt) 5     -- Error.
---      negate . sqrt 5     -- Error.      
+--      negate . sqrt 5     -- Error.
 
 -- lambda's are defined by \
 --      map (\(x, y) -> x + y) [(1, 2), (3, 4)] == [3, 7]
@@ -274,10 +274,10 @@ numUniques = length . nub
 --      (\x y z -> x + y + z) 1 2 3 == 6
 
 -- Folds are used to process a list element by element.  foldl and foldr start
--- from the left (or right) side, and are of the form: 
+-- from the left (or right) side, and are of the form:
 --     foldl function starting_value list
 -- To redefine the sum function:
-sum' = foldl (+) 0 
+sum'' = foldl (+) 0
 
 -- Reimplementing reverse, a more clever illustration:
 reverse' :: [a] -> [a]
@@ -288,3 +288,40 @@ reverse' = foldl (\acc x -> x : acc) []
 -- Scans are like folds, but return a list of all intermediate results.
 --      scanl (+) 0 [3, 2, 1] == [0, 3, 5, 6]
 
+-- TODO: Talk about Maybe
+
+-- We can create our own types.  Ex:
+data Point = Point Float Float deriving (Show)
+data Shape = Circle Point Float | Rectangle Point Point deriving (Show)
+-- This says that a Shape can either be a Circle or a Rectangle.
+-- The deriving (Show) just lets Haskell convert to a string by converting each
+-- component.
+--
+-- This makes constructors for Point, Circle, and Rectangle, but not for Shape.
+-- We can't make a Shape directly, only by making a Circle or Rectangle.
+
+-- Functions look like we'd expect.
+perimeter :: Shape -> Float
+perimeter (Circle _ r) = 2 * pi * r
+perimeter (Rectangle (Point x1 y1) (Point x2 y2)) = 2 * ((abs $ x1 - x2) + (abs $ y1 - y2))
+
+-- We can also define types using Record syntax:
+data Car = Car { company :: String
+               , model :: String
+               , year :: Int
+               } deriving (Show)
+-- This defines accessor functions automatically:
+--    mygt = Car "Ford" "Mustang" 1997
+--    year mygt == 1997
+
+-- We can also define types that transform other types:
+data Vector a = Vector a a a deriving (Show)
+-- The 'a' here can be any type, we will probably only use it with numeric types.
+vplus :: (Num t) => Vector t -> Vector t -> Vector t
+(Vector x y z) `vplus` (Vector u v w) = Vector (x + u) (y + v) (z + w)
+
+vsize :: (Floating t) => Vector t -> t
+vsize (Vector x y z) = sqrt $ x^2 + y^2 + z^2
+
+scalarMultiply :: (Num t) => t -> Vector t -> Vector t
+m `scalarMultiply` (Vector x y z) = Vector (m*x) (m*y) (m*z)
