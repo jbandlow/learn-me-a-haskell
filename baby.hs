@@ -1,4 +1,5 @@
-import Data.List
+import qualified Data.List as List
+import qualified Data.Map as Map
 
 -- ghci gives the interactive prompt, from the command line.
 -- A file (like this) can be loaded with :l <filename>
@@ -239,7 +240,7 @@ collatzSequence n
 -- Count uniques by taking the length of the list with duplicates removed.
 -- nub is the built in function that removes duplicates.
 numUniques :: (Eq a) => [a] -> Int
-numUniques = length . nub
+numUniques = length . List.nub
 
 -- takeWhile iterates through a possibly inifinite list, and stops when a
 -- predicate returns false.
@@ -277,11 +278,11 @@ numUniques = length . nub
 -- from the left (or right) side, and are of the form:
 --     foldl function starting_value list
 -- To redefine the sum function:
-sum'' = foldl (+) 0
+sum'' = List.foldl (+) 0
 
 -- Reimplementing reverse, a more clever illustration:
 reverse' :: [a] -> [a]
-reverse' = foldl (\acc x -> x : acc) []
+reverse' = List.foldl (\acc x -> x : acc) []
 -- There are also fold?1 functions, which take the first list value as the
 -- starting_value. These don't work on empty lists.
 --
@@ -293,12 +294,14 @@ reverse' = foldl (\acc x -> x : acc) []
 -- We can create our own types.  Ex:
 data Point = Point Float Float deriving (Show)
 data Shape = Circle Point Float | Rectangle Point Point deriving (Show)
--- This says that a Shape can either be a Circle or a Rectangle.
--- The deriving (Show) just lets Haskell convert to a string by converting each
--- component.
---
--- This makes constructors for Point, Circle, and Rectangle, but not for Shape.
--- We can't make a Shape directly, only by making a Circle or Rectangle.
+
+-- On the left side of a "data" declaration is the name of the type we are
+-- defining (and possibly type parameters, which I'll discuss later). On
+-- the right side, we define "data constructors" for this type. We can think of
+-- these as functions with arguments, but nothing is done with the arguments,
+-- we just hold on to them.  The pipe "|" separates these data constructors and
+-- "deriving (typeclass)" asks Haskell to automatically write the functions
+-- necessary for this type to belong to that typeclass.
 
 -- Functions look like we'd expect.
 perimeter :: Shape -> Float
@@ -314,14 +317,87 @@ data Car = Car { company :: String
 --    mygt = Car "Ford" "Mustang" 1997
 --    year mygt == 1997
 
--- We can also define types that transform other types:
+-- We can also define types with type parameters, which allow for type-flexibility
+-- in the data constructors.
 data Vector a = Vector a a a deriving (Show)
 -- The 'a' here can be any type, we will probably only use it with numeric types.
 vplus :: (Num t) => Vector t -> Vector t -> Vector t
 (Vector x y z) `vplus` (Vector u v w) = Vector (x + u) (y + v) (z + w)
 
 vsize :: (Floating t) => Vector t -> t
-vsize (Vector x y z) = sqrt $ x^2 + y^2 + z^2
+vsize (Vector x y z) = (x**2 + y**2 + z**2) ** (1 / 3)
 
-scalarMultiply :: (Num t) => t -> Vector t -> Vector t
-m `scalarMultiply` (Vector x y z) = Vector (m*x) (m*y) (m*z)
+scalarLMultiply :: (Num t) => t -> Vector t -> Vector t
+m `scalarLMultiply` (Vector x y z) = Vector (m*x) (m*y) (m*z)
+-- v = Vector 1.0 1.0 1.0
+-- vsize v == 3 ** (1 / 3)
+-- 2 `scalarLMultiply` v == v `vplus` v FAILS b/c we haven't defined ==.
+-- If we derive from Eq, it would work.  Common typeclass to derive from:
+--   Eq, Ord, Enum, Bounded, Show, Read
+
+-- We can also define a type to be a synonym for an existing type. Eg:
+type PhoneNumber = String
+type Name = String
+type PhoneBook = [(Name,PhoneNumber)]
+
+-- These can be parameterized as well:
+type IntMap v = Map.Map Int v
+-- Although we could have done "type IntMap = Map.Map Int" as well.
+
+-- We can define infix functions composed only of symbols:
+infixr 5 .*
+(.*) :: (Num t) => t -> Vector t -> Vector t
+a .* (Vector x y z) = Vector (a*x) (a*y) (a*z)
+
+infixr 5 *.
+(*.) :: (Num t) => Vector t -> t -> Vector t
+(Vector x y z) *. a = Vector (x*a) (y*a) (z*a)
+
+
+-- The next level of abstraction is to show how we can define typeclasses, and
+-- implement types of that typeclass.
+--
+-- class (typeclass restrictions) => NewTypeclassName classVar where
+--   Required function signatures, possibly with default implementations.
+class (Show a) => Howdy a where
+  howdy :: a -> String
+  howdy x = "Howdy, " ++ show x
+
+-- Define a class as usual.
+data Friends = Jessica | Jason deriving (Show)
+
+-- instance NewTypeclassName Class where
+--   implementation of the required functions.
+instance Howdy Friends where
+  howdy x = "Hi, " ++ show x
+
+-- In this case, there is a default implementation, so we don't need one.
+data Johns = JohnI | JohnII deriving (Show)
+instance Howdy Johns
+
+-- howdy Jason == "Hi, Jason"
+-- howdy JohnI == "Howdy, JohnI"
+
+-- Nice example of implementing "make everything work as a Bool":
+class YesNo a where
+  yesno :: a -> Bool
+
+instance YesNo Int where
+  yesno 0 = False
+  yesno _ = True
+
+instance YesNo [a] where  -- Works for lists and strings
+  yesno [] = False
+  yesno _ = True
+
+instance YesNo Bool where
+  yesno = id
+
+instance YesNo (Maybe a) where
+  yesno Nothing = False
+  yesno (Just _) = True
+
+-- Functor is a typeclass that applies to parameterized types (like Vector,
+-- specifically they must have kind: * -> *). The required function is fmap
+-- and it should tell you how to combine a function (f: a->b) and an object
+-- (v \in Vector a) to produce an object (v \in Vector b).
