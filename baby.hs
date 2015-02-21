@@ -400,4 +400,39 @@ instance YesNo (Maybe a) where
 -- Functor is a typeclass that applies to parameterized types (like Vector,
 -- specifically they must have kind: * -> *). The required function is fmap
 -- and it should tell you how to combine a function (f: a->b) and an object
--- (v \in Vector a) to produce an object (v \in Vector b).
+-- (v \in Vector $a) to produce an object (v \in Vector b). That is, if f
+-- is a functor (with concrete types (f a), (f b), etc.) then the signature
+-- of fmap is:
+--   (a -> b) -> f a -> f b
+--
+-- Applicative functors are similar.  If f is a functor (so that you have
+-- concrete types f Integer or f String, for example), then the key for
+-- applicative functors is concrete types where the "inner type" is a function.
+-- So f (Integer -> String), for example.  The required function is written
+-- as <*> and the point is that you should be able to apply a "functored
+-- function" to a "functored object".  So if F is an element of f (a -> b) and
+-- A is an element of f a, we should be able to apply F to A to get B in f b.
+-- This application is denoted <*> and has signature
+--      f (a -> b) -> f a -> f b
+-- For example, List is an applicative functor, so we can do:
+--     [(+)] <*> [3, 4] <*> [1, 2, 3] == [4, 5, 6, 5, 6, 7]
+-- Notice that the first application gives a list of curried functions, and
+-- the second application gives the values.
+--
+-- There is also a shorthand notation where we can put the function in an
+-- applicative context automatically:
+--    (+) <$> [3, 4] <*> [1, 2, 3] == [4, 5, 6, 5, 6, 7]
+--
+-- Finally, there are monads.  A monad is an applicative functor, with one
+-- more trick it can do.  Notice that the "special function" for functors
+-- involve functions a -> b, and the "special function" for applicatives
+-- involve values in f (a -> b) (which we can think of as functions). The
+-- "special function" for monads involves function a -> m b. The point being
+-- if you have a function that takes an ordinary value into a monadic context,
+-- you should also be able to apply that function in a monadic context. The
+-- special function is pronounced 'bind', is written as >>=, and has signature:
+--    m a -> (a -> m b) -> m b
+-- Note the strange order of the signature.  We use this infix like:
+--   {monadic value}  >>= {monadic function}
+-- but more commonly we don't write it at all, due to syntactic sugar I will
+-- cover later.
